@@ -35,7 +35,7 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install"]
+cmds = ["PUPPETEER_SKIP_DOWNLOAD=true npm install"]
 
 [start]
 cmd = "node bot.js"
