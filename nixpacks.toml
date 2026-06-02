@@ -35,10 +35,7 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = [
-  "npm install",
-  "npx puppeteer browsers install chrome"
-]
+cmds = ["PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install"]
 
 [start]
-cmd = "PUPPETEER_EXECUTABLE_PATH=$(which chromium) node bot.js"
+cmd = "node bot.js"
