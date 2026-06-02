@@ -1,5 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const QRCode = require('qrcode');
+const http = require('http');
 
 // ============================================================
 //  KONFIGURASI BOT RENTAL MOBIL
@@ -163,14 +165,41 @@ const client = new Client({
 // ============================================================
 //  EVENT HANDLERS
 // ============================================================
+// Simpan QR terbaru
+let lastQR = null;
+
+// Web server untuk tampilkan QR
+const server = http.createServer(async (req, res) => {
+  if (req.url === '/qr' || req.url === '/') {
+    if (!lastQR) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<html><head><meta http-equiv="refresh" content="3"><style>body{font-family:sans-serif;text-align:center;padding:40px;background:#f0f0f0}</style></head><body><h2>⏳ Menunggu QR Code...</h2><p>Halaman otomatis refresh setiap 3 detik</p></body></html>`);
+      return;
+    }
+    try {
+      const qrImage = await QRCode.toDataURL(lastQR, { width: 400, margin: 2 });
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<html><head><meta http-equiv="refresh" content="15"><style>body{font-family:sans-serif;text-align:center;padding:40px;background:#f0f0f0}img{border:8px solid white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2)}.box{background:white;display:inline-block;padding:30px;border-radius:16px}</style></head><body><div class="box"><h2>📱 Scan QR WhatsApp</h2><img src="${qrImage}" width="300"/><p>⏳ QR refresh otomatis tiap 15 detik</p><p style="color:gray;font-size:12px">Buka WhatsApp → Perangkat Tertaut → Tautkan Perangkat</p></div></body></html>`);
+    } catch(e) {
+      res.writeHead(500);
+      res.end('Error generating QR');
+    }
+  } else {
+    res.writeHead(404);
+    res.end('Not found');
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🌐 QR Web Server aktif di port ${PORT}`);
+  console.log(`🔗 Buka URL Railway Anda + /qr untuk scan QR`);
+});
+
 client.on('qr', (qr) => {
-  console.log('\n📱 QR Code (scan via WhatsApp):');
-  qrcode.generate(qr, { small: true });
-  // Simpan QR string ke file agar bisa diakses web viewer
-  const fs = require('fs');
-  fs.writeFileSync('qr.txt', qr);
-  console.log('\n✅ QR juga disimpan ke qr.txt');
-  console.log('⏳ Menunggu scan...\n');
+  lastQR = qr;
+  console.log('\n📱 QR baru tersedia! Buka URL Railway /qr di browser untuk scan.');
+  console.log('⏳ Menunggu scan WhatsApp...\n');
 });
 
 client.on('ready', () => {
