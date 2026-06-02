@@ -138,22 +138,38 @@ function pesanKonfirmasiBooking(data, mobil) {
 // ============================================================
 //  INISIALISASI CLIENT
 // ============================================================
-// Cari path chromium di sistem (Railway/Linux)
+// Paksa pakai Chromium sistem, skip download Chrome dari puppeteer
 const { execSync } = require('child_process');
 let chromiumPath;
 try {
-  chromiumPath = execSync('which chromium || which chromium-browser || which google-chrome', { encoding: 'utf8' }).trim();
+  chromiumPath = execSync('which chromium || which chromium-browser || which google-chrome-stable || which google-chrome', { encoding: 'utf8' }).trim();
   console.log('✅ Chromium ditemukan di:', chromiumPath);
 } catch (e) {
-  console.log('⚠️ Chromium tidak ditemukan, pakai default puppeteer');
-  chromiumPath = undefined;
+  // Coba path default NixOS/Railway
+  const candidates = [
+    '/run/current-system/sw/bin/chromium',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/nix/var/nix/profiles/default/bin/chromium',
+  ];
+  const fs = require('fs');
+  chromiumPath = candidates.find(p => { try { return fs.existsSync(p); } catch { return false; } });
+  if (chromiumPath) {
+    console.log('✅ Chromium ditemukan di:', chromiumPath);
+  } else {
+    console.log('❌ Chromium tidak ditemukan! Pastikan nixpacks.toml sudah benar.');
+    process.exit(1);
+  }
 }
+
+process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true';
+process.env.PUPPETEER_EXECUTABLE_PATH = chromiumPath;
 
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'rental-bot' }),
   puppeteer: {
     headless: true,
-    executablePath: chromiumPath || process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    executablePath: chromiumPath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
