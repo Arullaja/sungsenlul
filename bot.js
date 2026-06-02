@@ -138,11 +138,22 @@ function pesanKonfirmasiBooking(data, mobil) {
 // ============================================================
 //  INISIALISASI CLIENT
 // ============================================================
+// Cari path chromium di sistem (Railway/Linux)
+const { execSync } = require('child_process');
+let chromiumPath;
+try {
+  chromiumPath = execSync('which chromium || which chromium-browser || which google-chrome', { encoding: 'utf8' }).trim();
+  console.log('✅ Chromium ditemukan di:', chromiumPath);
+} catch (e) {
+  console.log('⚠️ Chromium tidak ditemukan, pakai default puppeteer');
+  chromiumPath = undefined;
+}
+
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'rental-bot' }),
   puppeteer: {
     headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    executablePath: chromiumPath || process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
