@@ -1,23 +1,12 @@
-FROM node:18-slim
+FROM node:20-slim
 
-# Install Chromium dan semua dependency yang dibutuhkan
 RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-sandbox \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf \
-    libxss1 \
+    ffmpeg \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment agar puppeteer pakai chromium sistem
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
 WORKDIR /app
+RUN mkdir -p /app/auth_info
 
 COPY package*.json ./
 RUN npm install
