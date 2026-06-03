@@ -1,16 +1,17 @@
 {
   "name": "wa-rental-bot",
   "version": "1.0.0",
-  "description": "Bot WhatsApp Rental Mobil",
+  "description": "Bot WhatsApp Rental Mobil - Baileys",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
   "dependencies": {
-    "whatsapp-web.js": "^1.23.0",
-    "puppeteer-core": "^22.0.0",
-    "qrcode-terminal": "^0.12.0",
-    "qrcode": "^1.5.3"
+    "@whiskeysockets/baileys": "^6.7.9",
+    "pino": "^8.19.0",
+    "pino-pretty": "^11.0.0",
+    "qrcode": "^1.5.3",
+    "qrcode-terminal": "^0.12.0"
   },
   "engines": {
     "node": ">=18.0.0"
