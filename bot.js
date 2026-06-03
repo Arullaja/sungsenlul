@@ -11,7 +11,7 @@ const CONFIG = {
   noAdmin: '6282130295912', // Ganti dengan nomor admin/pemilik
   jamOperasional: '24 JAM',
   lokasi: 'Jl. Contoh No. 123, Bandung',
-  kontakAdmin: '0812-3029-5912',
+  kontakAdmin: '0821-3029-5912',
 };
 
 // ============================================================
