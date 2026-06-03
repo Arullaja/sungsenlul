@@ -2,9 +2,6 @@ const venom = require('venom-bot');
 const QRCode = require('qrcode');
 const express = require('express');
 
-// ============================================================
-//  KONFIGURASI
-// ============================================================
 const CONFIG = {
   namaPerusahaan: 'Rental Mobil Bandung',
   noAdmin: '6281234567890',
@@ -25,9 +22,6 @@ const ARMADA = {
   '9':  { nama: 'Daihatsu Xenia',          kategori: 'Family MPV',            harga: 350000, kapasitas: 7, transmisi: 'Manual', sopir: false },
 };
 
-// ============================================================
-//  SESSION
-// ============================================================
 const sessions = {};
 function getSession(id) {
   if (!sessions[id]) sessions[id] = { step: 'MENU', data: {} };
@@ -35,9 +29,6 @@ function getSession(id) {
 }
 function resetSession(id) { sessions[id] = { step: 'MENU', data: {} }; }
 
-// ============================================================
-//  PESAN
-// ============================================================
 function pesanMenu() {
   return `🚗 *${CONFIG.namaPerusahaan}*\n━━━━━━━━━━━━━━━━━━━━━\nSelamat datang! Pilih menu:\n\n*1️⃣ Lihat Daftar Mobil*\n*2️⃣ Booking Sekarang*\n*3️⃣ Syarat & Ketentuan*\n*4️⃣ Hubungi Admin*\n*5️⃣ Lokasi & Jam Buka*\n\n_Ketik angka untuk memilih_`;
 }
@@ -56,37 +47,35 @@ function pesanKonfirmasi(data, mobil) {
   return `📝 *KONFIRMASI PESANAN*\n━━━━━━━━━━━━━━━━━━━━━\n\n` +
     `👤 *Nama :* ${data.nama}\n📱 *No WA :* ${data.noWA}\n🆘 *Darurat :* ${data.kontakDarurat}\n📧 *Email :* ${data.email}\n🪪 *NIM/NIK :* ${data.nik}\n\n` +
     (data.status === 'mahasiswa'
-      ? `🎓 Universitas : ${data.universitas}\n   Jurusan : ${data.jurusan}\n   Angkatan : ${data.angkatan}\n`
-      : `💼 Tempat Kerja : ${data.tempatKerja}\n   Divisi : ${data.divisi}\n`) +
-    `\n🚗 *${mobil.nama}* (${mobil.kategori})\n📅 ${data.tanggalMulai} → ${data.tanggalSelesai} (${data.lamaHari} hari)\n👨‍✈️ Sopir: ${data.pakaiSopir ? 'Ya' : 'Tidak'}\n\n💰 *Total: Rp ${total.toLocaleString('id-ID')}*\n\n*1. ✅ Konfirmasi*\n*2. ❌ Batalkan*`;
+      ? `🎓 ${data.universitas} | ${data.jurusan} | ${data.angkatan}\n`
+      : `💼 ${data.tempatKerja} | ${data.divisi}\n`) +
+    `\n🚗 *${mobil.nama}* (${mobil.kategori})\n📅 ${data.tanggalMulai} → ${data.tanggalSelesai} (${data.lamaHari} hari)\n👨‍✈️ Sopir: ${data.pakaiSopir ? 'Ya (+Rp 150.000/hari)' : 'Tidak'}\n\n💰 *Total: Rp ${total.toLocaleString('id-ID')}*\n\n*1. ✅ Konfirmasi*\n*2. ❌ Batalkan*`;
 }
 
-// ============================================================
-//  WEB SERVER QR
-// ============================================================
+// Web server QR
 let lastQR = null;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', async (req, res) => {
   if (!lastQR) {
-    return res.send(`<html><head><meta http-equiv="refresh" content="3"><style>body{font-family:sans-serif;text-align:center;padding:50px;background:#f0f9f4}</style></head><body><h2>⏳ Bot sudah aktif atau menunggu QR...</h2><p>Refresh otomatis tiap 3 detik</p></body></html>`);
+    return res.send(`<html><head><meta http-equiv="refresh" content="5"><style>body{font-family:sans-serif;text-align:center;padding:50px;background:#f0f9f4}</style></head><body><h2>⏳ Menunggu QR...</h2><p>Auto refresh tiap 5 detik</p></body></html>`);
   }
   const qrImg = await QRCode.toDataURL(lastQR, { width: 400 });
-  res.send(`<html><head><meta http-equiv="refresh" content="20"><style>body{font-family:sans-serif;text-align:center;padding:40px;background:#f0f9f4}.box{background:white;display:inline-block;padding:30px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1)}h2{color:#1a7a4a}</style></head><body><div class="box"><h2>📱 Scan QR WhatsApp</h2><img src="${qrImg}" width="320"/><p>Auto refresh 20 detik | WhatsApp → Perangkat Tertaut → Tautkan</p></div></body></html>`);
+  res.send(`<html><head><meta http-equiv="refresh" content="20"><style>body{font-family:sans-serif;text-align:center;padding:40px;background:#f0f9f4}.box{background:white;display:inline-block;padding:30px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.1)}h2{color:#1a7a4a}</style></head><body><div class="box"><h2>📱 Scan QR WhatsApp</h2><img src="${qrImg}" width="300"/><p>Auto refresh 20 detik</p><p style="color:gray;font-size:13px">WhatsApp → Perangkat Tertaut → Tautkan Perangkat</p></div></body></html>`);
 });
 
 app.listen(PORT, '0.0.0.0', () => console.log(`🌐 Web QR aktif: port ${PORT}`));
 
-// ============================================================
-//  HANDLER PESAN
-// ============================================================
+// Handler pesan
 async function handlePesan(client, from, body) {
   const session = getSession(from);
   const input = body.trim();
-  console.log(`📨 ${new Date().toLocaleTimeString('id-ID')} dari ${from}: ${input}`);
+  console.log(`📨 ${new Date().toLocaleTimeString('id-ID')} | ${from}: ${input}`);
 
-  const kirim = async (teks) => await client.sendText(from, teks);
+  const kirim = async (teks) => {
+    try { await client.sendText(from, teks); } catch(e) { console.error('Gagal kirim:', e.message); }
+  };
 
   if (/^(halo|hai|hi|hello|start|mulai|menu)$/i.test(input)) { resetSession(from); await kirim(pesanMenu()); return; }
   if (/^back$/i.test(input)) { resetSession(from); await kirim(pesanMenu()); return; }
@@ -94,22 +83,22 @@ async function handlePesan(client, from, body) {
   switch (session.step) {
     case 'MENU':
       if (input === '1') { session.step = 'LIHAT_MOBIL'; await kirim(pesanDaftarMobil()); }
-      else if (input === '2') { session.step = 'INPUT_NAMA'; await kirim(`📝 *FORM BOOKING*\n━━━━━━━━━━━━━━━━━━━━━\n\n👤 Masukkan *Nama Lengkap* Anda:`); }
-      else if (input === '3') await kirim(`📋 *SYARAT & KETENTUAN*\n━━━━━━━━━━━━━━━━━━━━━\n\n✅ KTP asli + SIM A aktif + KK\n✅ Minimal sewa 1 hari\n✅ Deposit Rp 500.000 - 1.000.000\n✅ BBM ditanggung penyewa\n✅ Pembatalan <24 jam kena biaya 50%\n\n_Ketik *BACK* untuk kembali_`);
-      else if (input === '4') await kirim(`👨‍💼 *HUBUNGI ADMIN*\n━━━━━━━━━━━━━━━━━━━━━\n📞 ${CONFIG.kontakAdmin}\n🕐 ${CONFIG.jamOperasional}\n\n_Ketik *BACK* untuk kembali_`);
-      else if (input === '5') await kirim(`📍 *LOKASI*\n━━━━━━━━━━━━━━━━━━━━━\n🏢 ${CONFIG.lokasi}\n🕐 ${CONFIG.jamOperasional}\n\n_Ketik *BACK* untuk kembali_`);
+      else if (input === '2') { session.step = 'INPUT_NAMA'; await kirim(`📝 *FORM BOOKING*\n━━━━━━━━━━━━━━━━━━━━━\n\n👤 Masukkan *Nama Lengkap*:`); }
+      else if (input === '3') await kirim(`📋 *SYARAT*\n━━━━━━━━━━━━━━━━━━━━━\n✅ KTP + SIM A + KK\n✅ Minimal 1 hari\n✅ Deposit Rp 500rb-1jt\n✅ BBM penyewa\n✅ Batal <24jam = 50%\n\n_Ketik *BACK* kembali_`);
+      else if (input === '4') await kirim(`👨‍💼 *ADMIN*\n━━━━━━━━━━━━━━━━━━━━━\n📞 ${CONFIG.kontakAdmin}\n🕐 ${CONFIG.jamOperasional}`);
+      else if (input === '5') await kirim(`📍 *LOKASI*\n━━━━━━━━━━━━━━━━━━━━━\n🏢 ${CONFIG.lokasi}\n🕐 ${CONFIG.jamOperasional}`);
       else await kirim(pesanMenu());
       break;
 
     case 'LIHAT_MOBIL':
-      if (ARMADA[input]) { session.data.mobilKey = input; session.step = 'INPUT_NAMA'; await kirim(`✅ Pilih: *${ARMADA[input].nama}*\n\n👤 Masukkan *Nama Lengkap*:`); }
+      if (ARMADA[input]) { session.data.mobilKey = input; session.step = 'INPUT_NAMA'; await kirim(`✅ *${ARMADA[input].nama}*\n\n👤 Masukkan *Nama Lengkap*:`); }
       else await kirim(pesanDaftarMobil());
       break;
 
     case 'INPUT_NAMA':
       if (input.length < 3) { await kirim('❌ Nama terlalu pendek:'); break; }
       session.data.nama = input; session.step = 'INPUT_NOWA';
-      await kirim(`👋 Halo *${input}*!\n\n📱 Masukkan *No WhatsApp*:\nContoh: 08123456789`); break;
+      await kirim(`👋 Halo *${input}*!\n📱 Masukkan *No WhatsApp*:\nContoh: 08123456789`); break;
 
     case 'INPUT_NOWA':
       if (!/^08[0-9]{8,12}$/.test(input)) { await kirim('❌ Format salah. Contoh: 08123456789'); break; }
@@ -122,37 +111,37 @@ async function handlePesan(client, from, body) {
       await kirim(`📧 Masukkan *Email*:`); break;
 
     case 'INPUT_EMAIL':
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)) { await kirim('❌ Format email salah. Contoh: nama@email.com'); break; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)) { await kirim('❌ Format salah. Contoh: nama@email.com'); break; }
       session.data.email = input; session.step = 'INPUT_NIK';
       await kirim(`🪪 Masukkan *NIM / NIK*:`); break;
 
     case 'INPUT_NIK':
-      if (input.length < 5) { await kirim('❌ Terlalu pendek. Masukkan ulang:'); break; }
+      if (input.length < 5) { await kirim('❌ Terlalu pendek:'); break; }
       session.data.nik = input; session.step = 'INPUT_STATUS';
-      await kirim(`📋 *Status:*\n\n*1. 🎓 Mahasiswa/Pelajar*\n*2. 💼 Pekerja*`); break;
+      await kirim(`📋 *Status:*\n*1. 🎓 Mahasiswa*\n*2. 💼 Pekerja*`); break;
 
     case 'INPUT_STATUS':
-      if (input === '1') { session.data.status = 'mahasiswa'; session.step = 'INPUT_UNIVERSITAS'; await kirim(`🎓 Nama *Universitas*:`); }
+      if (input === '1') { session.data.status = 'mahasiswa'; session.step = 'INPUT_UNIVERSITAS'; await kirim(`🎓 *Universitas*:`); }
       else if (input === '2') { session.data.status = 'pekerja'; session.step = 'INPUT_TEMPAT_KERJA'; await kirim(`🏢 *Tempat Kerja*:`); }
-      else await kirim('Ketik *1* Mahasiswa atau *2* Pekerja:');
+      else await kirim('Ketik *1* atau *2*:');
       break;
 
     case 'INPUT_UNIVERSITAS': session.data.universitas = input; session.step = 'INPUT_JURUSAN'; await kirim(`📚 *Jurusan*:`); break;
     case 'INPUT_JURUSAN': session.data.jurusan = input; session.step = 'INPUT_ANGKATAN'; await kirim(`📅 *Angkatan* (contoh: 2022):`); break;
-    case 'INPUT_ANGKATAN': session.data.angkatan = input; session.step = 'PILIH_MOBIL_BOOKING'; await kirim(`✅ Data tersimpan!\n\n${pesanDaftarMobil()}`); break;
-    case 'INPUT_TEMPAT_KERJA': session.data.tempatKerja = input; session.step = 'INPUT_DIVISI'; await kirim(`🏬 *Divisi/Bagian*:`); break;
-    case 'INPUT_DIVISI': session.data.divisi = input; session.step = 'PILIH_MOBIL_BOOKING'; await kirim(`✅ Data tersimpan!\n\n${pesanDaftarMobil()}`); break;
+    case 'INPUT_ANGKATAN': session.data.angkatan = input; session.step = 'PILIH_MOBIL_BOOKING'; await kirim(`✅ Tersimpan!\n\n${pesanDaftarMobil()}`); break;
+    case 'INPUT_TEMPAT_KERJA': session.data.tempatKerja = input; session.step = 'INPUT_DIVISI'; await kirim(`🏬 *Divisi*:`); break;
+    case 'INPUT_DIVISI': session.data.divisi = input; session.step = 'PILIH_MOBIL_BOOKING'; await kirim(`✅ Tersimpan!\n\n${pesanDaftarMobil()}`); break;
 
     case 'PILIH_MOBIL_BOOKING':
       if (ARMADA[input]) {
         session.data.mobilKey = input; session.step = 'INPUT_TANGGAL_MULAI';
-        await kirim(`✅ *${ARMADA[input].nama}*\n\n📅 *Tanggal pengambilan* (DD/MM/YYYY):\nContoh: 25/12/2024`);
-      } else await kirim(`❌ Pilihan tidak valid.\n\n${pesanDaftarMobil()}`);
+        await kirim(`✅ *${ARMADA[input].nama}*\n\n📅 *Tanggal pengambilan* (DD/MM/YYYY):`);
+      } else await kirim(`❌ Tidak valid.\n\n${pesanDaftarMobil()}`);
       break;
 
     case 'INPUT_TANGGAL_MULAI': {
       const re = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-      if (!re.test(input)) { await kirim('❌ Format salah. Gunakan DD/MM/YYYY'); break; }
+      if (!re.test(input)) { await kirim('❌ Format: DD/MM/YYYY'); break; }
       const [,d,m,y] = input.match(re);
       const tgl = new Date(`${y}-${m}-${d}`);
       if (isNaN(tgl)) { await kirim('❌ Tanggal tidak valid:'); break; }
@@ -171,7 +160,7 @@ async function handlePesan(client, from, body) {
       const mobil = ARMADA[session.data.mobilKey];
       if (mobil.sopir) {
         session.step = 'PILIH_SOPIR';
-        await kirim(`📅 Selesai: *${session.data.tanggalSelesai}*\n\n🧑‍✈️ *Pakai Sopir?*\nTambahan Rp 150.000/hari\n\n*1. ✅ Ya*\n*2. ❌ Tidak*`);
+        await kirim(`📅 Selesai: *${session.data.tanggalSelesai}*\n\n🧑‍✈️ *Pakai Sopir?* (+Rp 150rb/hari)\n*1. ✅ Ya*\n*2. ❌ Tidak*`);
       } else {
         session.data.pakaiSopir = false; session.step = 'KONFIRMASI';
         await kirim(pesanKonfirmasi(session.data, mobil));
@@ -191,14 +180,14 @@ async function handlePesan(client, from, body) {
       if (input === '1') {
         const mobil = ARMADA[session.data.mobilKey];
         const d = session.data;
-        const adminMsg = `🔔 *PESANAN BARU!*\n━━━━━━━━━━━━━━━━━━━━━\n👤 ${d.nama}\n📱 ${d.noWA}\n🆘 ${d.kontakDarurat}\n📧 ${d.email}\n🪪 ${d.nik}\n` +
+        const adminMsg = `🔔 *PESANAN BARU!*\n━━━━━━━━━━━━━━━━━━━━━\n👤 ${d.nama} | 📱 ${d.noWA}\n🆘 ${d.kontakDarurat} | 📧 ${d.email}\n🪪 ${d.nik}\n` +
           (d.status === 'mahasiswa' ? `🎓 ${d.universitas} | ${d.jurusan} | ${d.angkatan}\n` : `💼 ${d.tempatKerja} | ${d.divisi}\n`) +
-          `🚗 ${mobil.nama} (${mobil.kategori})\n📅 ${d.tanggalMulai} → ${d.tanggalSelesai} (${d.lamaHari} hari)\n👨‍✈️ Sopir: ${d.pakaiSopir ? 'Ya' : 'Tidak'}\n💰 Total: Rp ${((mobil.harga + (d.pakaiSopir ? 150000 : 0)) * d.lamaHari).toLocaleString('id-ID')}`;
-        await client.sendText(`${CONFIG.noAdmin}@c.us`, adminMsg);
-        await kirim(`✅ *PESANAN DITERIMA!*\n\nTerima kasih *${d.nama}*!\nAdmin akan menghubungi dalam 1x24 jam.\n📞 ${CONFIG.kontakAdmin}\n\n_Ketik *MENU* untuk kembali_`);
+          `🚗 ${mobil.nama} | 📅 ${d.tanggalMulai}→${d.tanggalSelesai} (${d.lamaHari}hr)\n👨‍✈️ ${d.pakaiSopir?'Pakai sopir':'Self drive'}\n💰 Rp ${((mobil.harga+(d.pakaiSopir?150000:0))*d.lamaHari).toLocaleString('id-ID')}`;
+        try { await client.sendText(`${CONFIG.noAdmin}@c.us`, adminMsg); } catch(e) {}
+        await kirim(`✅ *PESANAN DITERIMA!*\n\nTerima kasih *${d.nama}*!\nAdmin hubungi dalam 1x24 jam.\n📞 ${CONFIG.kontakAdmin}\n\n_Ketik *MENU* untuk kembali_`);
         resetSession(from);
       } else if (input === '2') {
-        resetSession(from); await kirim('❌ Dibatalkan.\n\nKetik *MENU* untuk kembali.');
+        resetSession(from); await kirim('❌ Dibatalkan. Ketik *MENU* kembali.');
       } else await kirim('Ketik *1* konfirmasi atau *2* batalkan.');
       break;
 
@@ -206,48 +195,55 @@ async function handlePesan(client, from, body) {
   }
 }
 
-// ============================================================
-//  START VENOM
-// ============================================================
+// Start venom
 console.log('🚀 Memulai Bot WhatsApp Rental Mobil...');
 
-// Hapus sesi lama agar QR muncul fresh
+// Hapus sesi lama
 const { execSync } = require('child_process');
-try {
-  execSync('rm -rf /app/tokens/rental-bot');
-  console.log('🗑️ Sesi lama dihapus, QR akan muncul baru.');
-} catch(e) {}
+try { execSync('rm -rf /app/tokens/rental-bot'); console.log('🗑️ Sesi lama dihapus.'); } catch(e) {}
 
 venom.create(
   'rental-bot',
-  (base64Qr) => {
-    // base64Qr sudah dalam format data URL
-    lastQR = base64Qr.replace('data:image/png;base64,', '');
-    console.log('📱 QR tersedia! Buka /qr di browser.');
+  (base64Qr, asciiQR, attempts, urlCode) => {
+    lastQR = urlCode; // simpan string QR asli
+    console.log(`📱 QR tersedia (percobaan ${attempts})! Buka domain Railway untuk scan.`);
   },
   (statusSession) => {
-    console.log('Status:', statusSession);
+    console.log('📊 Status:', statusSession);
+    if (statusSession === 'qrReadSuccess' || statusSession === 'inChat') {
+      lastQR = null;
+    }
   },
   {
-    headless: true,
+    headless: 'new',
     devtools: false,
     useChrome: false,
     debug: false,
     logQR: false,
+    autoClose: 0,
+    createPathFileToken: true,
+    waitForLogin: true,
     browserArgs: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-gpu',
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-sync',
+      '--disable-translate',
+      '--no-first-run',
       '--single-process',
+      '--memory-pressure-off',
+      '--max_old_space_size=512',
     ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+    executablePath: '/usr/bin/chromium',
     folderNameToken: '/app/tokens',
   }
 ).then((client) => {
+  lastQR = null;
   console.log('✅ Bot WhatsApp Rental Mobil AKTIF!');
   console.log(`🏢 ${CONFIG.namaPerusahaan}`);
-  lastQR = null;
 
   client.onMessage(async (msg) => {
     if (msg.isGroupMsg || msg.from === 'status@broadcast') return;
@@ -255,18 +251,19 @@ venom.create(
     try {
       await handlePesan(client, msg.from, msg.body);
     } catch (err) {
-      console.error('❌ Error:', err);
-      await client.sendText(msg.from, '⚠️ Terjadi kesalahan. Ketik *MENU* untuk memulai ulang.');
+      console.error('❌ Error:', err.message);
+    }
+  });
+
+  client.onStateChange((state) => {
+    console.log('🔄 State:', state);
+    if (state === 'CONFLICT' || state === 'UNLAUNCHED') {
+      client.useHere();
     }
   });
 
 }).catch((err) => {
-  console.error('❌ Gagal start bot:', err);
-  // Hapus token lalu restart
-  try {
-    const { execSync } = require('child_process');
-    execSync('rm -rf /app/tokens/rental-bot');
-    console.log('🗑️ Token dihapus, restart dalam 5 detik...');
-  } catch(e) {}
-  setTimeout(() => process.exit(1), 5000);
+  console.error('❌ Gagal start:', err.message);
+  try { execSync('rm -rf /app/tokens/rental-bot'); } catch(e) {}
+  setTimeout(() => process.exit(1), 3000);
 });
