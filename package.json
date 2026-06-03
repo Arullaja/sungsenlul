@@ -7,11 +7,14 @@
     "start": "node bot.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.9",
+    "@whiskeysockets/baileys": "6.7.9",
     "pino": "^8.19.0",
-    "pino-pretty": "^11.0.0",
     "qrcode": "^1.5.3",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "node-cache": "^5.1.2"
+  },
+  "overrides": {
+    "@whiskeysockets/libsignal": "npm:@adiwajshing/libsignal@^1.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
