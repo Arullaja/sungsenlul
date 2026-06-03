@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@adiwajshing/baileys');
 const pino = require('pino');
 const QRCode = require('qrcode');
 const http = require('http');
@@ -10,10 +10,10 @@ const path = require('path');
 //  KONFIGURASI BOT RENTAL MOBIL
 // ============================================================
 const CONFIG = {
-  namaPerusahaan: 'Rental Mobil Bandung',
-  noAdmin: '082118776639', // Ganti dengan nomor admin/pemilik (tanpa +)
-  jamOperasional: '24 JAM',
-  lokasi: 'Jl. ADHYAKSA BARAT III',
+  namaPerusahaan: ' SenjayaRent',
+  noAdmin: '082130295912', // Ganti dengan nomor admin/pemilik (tanpa +)
+  jamOperasional: '08:00 - 20:00 WIB',
+  lokasi: 'Jl. Contoh No. 123, Bandung',
   kontakAdmin: '0821-3029-5912',
 };
 
