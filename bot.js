@@ -211,6 +211,13 @@ async function handlePesan(client, from, body) {
 // ============================================================
 console.log('🚀 Memulai Bot WhatsApp Rental Mobil...');
 
+// Hapus sesi lama agar QR muncul fresh
+const { execSync } = require('child_process');
+try {
+  execSync('rm -rf /app/tokens/rental-bot');
+  console.log('🗑️ Sesi lama dihapus, QR akan muncul baru.');
+} catch(e) {}
+
 venom.create(
   'rental-bot',
   (base64Qr) => {
