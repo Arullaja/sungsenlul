@@ -15,11 +15,16 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
-RUN mkdir -p /app/tokens
+
+# Buat folder tokens bersih setiap build
+RUN rm -rf /app/tokens && mkdir -p /app/tokens
 
 COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Hapus token lama saat container start
+RUN rm -rf /app/tokens/*
 
 CMD ["node", "bot.js"]
