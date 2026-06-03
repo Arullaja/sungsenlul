@@ -262,4 +262,11 @@ venom.create(
 
 }).catch((err) => {
   console.error('❌ Gagal start bot:', err);
+  // Hapus token lalu restart
+  try {
+    const { execSync } = require('child_process');
+    execSync('rm -rf /app/tokens/rental-bot');
+    console.log('🗑️ Token dihapus, restart dalam 5 detik...');
+  } catch(e) {}
+  setTimeout(() => process.exit(1), 5000);
 });
