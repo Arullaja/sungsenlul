@@ -8,10 +8,10 @@ const http = require('http');
 // ============================================================
 const CONFIG = {
   namaPerusahaan: 'Rental Mobil Bandung',
-  noAdmin: '6292130295912', // Ganti dengan nomor admin/pemilik
-  jamOperasional: '24 JAM',
-  lokasi: 'https://maps.app.goo.gl/etWse5PBv71fRxnY8',
-  kontakAdmin: '0821-3029-5912',
+  noAdmin: '6281234567890', // Ganti dengan nomor admin/pemilik
+  jamOperasional: '08:00 - 20:00 WIB',
+  lokasi: 'Jl. Contoh No. 123, Bandung',
+  kontakAdmin: '0812-3456-7890',
 };
 
 // ============================================================
@@ -219,14 +219,11 @@ client.on('disconnected', (reason) => {
 // ============================================================
 //  HANDLER PESAN MASUK
 // ============================================================
-client.on('message_create', async (msg) => {
-  console.log(`🔔 message_create: from=${msg.from} body=${msg.body} fromMe=${msg.fromMe}`);
-});
-
 client.on('message', async (msg) => {
-  console.log(`📩 RAW message: from=${msg.from} body=${msg.body}`);
+  console.log(`📩 RAW message: from=${msg.from} body=${msg.body} type=${msg.type}`);
   // Abaikan pesan dari grup dan status
-  if (msg.isGroupMsg || msg.from.includes('status')) return;
+  if (msg.from.includes('status') || msg.from.includes('broadcast')) return;
+  if (msg.fromMe) return;
 
   const from = msg.from;
   const body = msg.body.trim();
