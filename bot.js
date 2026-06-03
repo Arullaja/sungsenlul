@@ -7,11 +7,11 @@ const http = require('http');
 //  KONFIGURASI BOT RENTAL MOBIL
 // ============================================================
 const CONFIG = {
-  namaPerusahaan: 'Rental Mobil Bandung',
-  noAdmin: '6281234567890', // Ganti dengan nomor admin/pemilik
-  jamOperasional: '08:00 - 20:00 WIB',
+  namaPerusahaan: 'SenjayaRent',
+  noAdmin: '6282130295912', // Ganti dengan nomor admin/pemilik
+  jamOperasional: '24 JAM',
   lokasi: 'Jl. Contoh No. 123, Bandung',
-  kontakAdmin: '0812-3456-7890',
+  kontakAdmin: '0812-3029-5912',
 };
 
 // ============================================================
@@ -145,7 +145,7 @@ const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium
 console.log('✅ Menggunakan Chromium:', chromiumPath);
 
 const client = new Client({
-  authStrategy: new LocalAuth({ clientId: 'rental-bot' }),
+  authStrategy: new LocalAuth({ clientId: 'rental-bot', dataPath: '/app/.wwebjs_auth' }),
   puppeteer: {
     headless: true,
     executablePath: chromiumPath,
@@ -220,10 +220,13 @@ client.on('disconnected', (reason) => {
 //  HANDLER PESAN MASUK
 // ============================================================
 client.on('message', async (msg) => {
-  console.log(`📩 RAW message: from=${msg.from} body=${msg.body} type=${msg.type}`);
-  // Abaikan pesan dari grup dan status
-  if (msg.from.includes('status') || msg.from.includes('broadcast')) return;
+  // Abaikan status, broadcast, grup, dan pesan dari bot sendiri
   if (msg.fromMe) return;
+  if (msg.from.includes('status@broadcast')) return;
+  if (msg.from.includes('@g.us')) return;
+  if (msg.type !== 'chat') return;
+
+  console.log(`📨 [${new Date().toLocaleTimeString('id-ID')}] Pesan dari ${msg.from}: ${msg.body}`);
 
   const from = msg.from;
   const body = msg.body.trim();
